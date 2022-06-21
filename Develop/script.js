@@ -1,151 +1,53 @@
+/*GIVEN I am using a daily planner to create a schedule
+WHEN I open the planner
+THEN the current day is displayed at the top of the calendar
+WHEN I scroll down
+THEN I am presented with time blocks for standard business hours
+WHEN I view the time blocks for that day
+THEN each time block is color-coded to indicate whether it is in the past, present, or future
+WHEN I click into a time block
+THEN I can enter an event
+WHEN I click the save button for that time block
+THEN the text for that event is saved in local storage
+WHEN I refresh the page
+THEN the saved events persist*/
+$(document).ready(function(){
 
-// Function to get current date from moment.js.
-function getTodaysDate() {
-    var todaysDate = moment().format("MMM Do YY");
-    $("#currentDay").text(todaysDate);
-}
-
-// Creating array info for time blocks.
-
-var timeBlock = [
-    {
-        id: "0",
-        hour: "7",
-        time: "07",
-        meridiem: "am",
-        task: "",
-    }, 
-    {
-        id: "1",
-        hour: "8",
-        time: "08",
-        meridiem: "am",
-        task: "", 
-    },
-    {
-        id: "2",
-        hour: "9",
-        time: "09",
-        meridiem: "am",
-        task: "",
-    },
-    {
-        id: "3",
-        hour: "10",
-        time: "10",
-        meridiem: "am",
-        task: "",
-    },
-    {
-        id: "4",
-        hour: "11",
-        time: "11",
-        meridiem: "am",
-        task: "",
-    },
-    {
-        id: "5",
-        hour: "12",
-        time: "12",
-        meridiem: "pm",
-        task: "",
-    },
-    {
-        id: "6",
-        hour: "1",
-        time: "13",
-        meridiem: "pm",
-        task: "",
-    },
-    {
-        id: "7",
-        hour: "2",
-        time: "14",
-        meridiem: "pm",
-        task: "",
-    },
-    {
-        id: "8",
-        hour: "3",
-        time: "15",
-        meridiem: "pm",
-        task: "",
-    },
-
-];
-
-//creating visuals for timeblocks.
-timeBlock.forEach(function(thisHour) {
-    var hourRow = $("<form>")
-    .attr({"class": "row"
-    });
-
-    $(".container").append(hourRow);
-
-    var hourField = $("<div>")
-    .text(`${thisHour.hour}${thisHour.meridiem}`)
-    .attr({"class": "col-md-1 hour"
-    });
-
-    var hourText = $("<div>")
-    .attr({"class": "col-md-10 description p-0"});
-
-    var textArea = $("<textarea>");
-    hourText.append(textArea);
-    textArea.attr("id",thisHour.id);
-    if(thisHour.time < moment().format("HH")) {
-        textArea.attr ({
-            "class": "past",
-        })
-    }else if(thisHour.time === moment().format("HH")) {
-        textArea.attr ({
-            "class": "present"
-        })
-    }else if(thisHour.time > moment().format("HH")) {
-        textArea.attr ({
-            "class": "future"
-        })
-    }
-
-    var saveButton = $("<i class='far fa-save fa-lg'></i>")
-    var savePlan = $("<button>")
-    .attr({
-        "class": "col-md-1 saveBtn"
-    });
-    savePlan.append(saveButton);
-    hourRow.append(hourField, hourText, savePlan);
-})
-
-function saveReminders() {
-    localStorage.setItem("timeBlock", JSON.stringify(timeBlock));
-}
-
-function displayReminders() {
-    timeBlock.forEach(function (_thisHour) {
-        $(`#${_thisHour.id}`).val(_thisHour.reminder);
+    $('.saveBtn').on('click', function(){
+        var text = $(this).siblings('.description').val()
+        var time = $(this).parent().attr('id');
+        console.log(text)
+        localStorage.setItem(time,text)
     })
-}
 
-function init() {
-    var savedInfo = JSON.parse(localStorage.getItem("timeBlock"));
+    function hourCheck() {
+        var currentHour = moment().hours()
+        $('.time-block').each(function() {
+            var hourValue = parseInt($(this).attr('id').split('-')[1])
+            if(hourValue < currentHour){
+                $(this).addClass('past')
+            } else if ( hourValue === currentHour) {
+                $(this).removeClass('past');
+                $(this).addClass('present');
+            } else  {
+                $(this).removeClass('present')
+                $(this).removeClass('past')
+                $(this).addClass('future')
+            };
+        })
 
-    if(savedInfo) {
-        timeBlock = savedInfo;
     }
-    saveReminders();
-    displayReminders();
-}
 
-init();
+    hourCheck()
+    var check = setInterval(hourCheck,20000)
 
-// Sets header date to current day
-getTodaysDate();
+    $('#hour-7 .description').val(localStorage.getItem('hour-7'))
+    $('#hour-8 .description').val(localStorage.getItem('hour-8'))
+    $('#hour-9 .description').val(localStorage.getItem('hour-9'))
+    $('#hour-10 .description').val(localStorage.getItem('hour-10'))
+    $('#hour-11 .description').val(localStorage.getItem('hour-11'))
+    $('#hour-12 .description').val(localStorage.getItem('hour-12'))
+    $('#hour-13 .description').val(localStorage.getItem('hour-13'))
 
-$(".saveBtn").on("click", function(event) {
-    event.preventDefault();
-    var saveIndex = $(this).siblings(".description").children(".future").attr("id");
-    timeBlock[saveIndex].reminder = $(this).siblings(".description").children(".future").val();
-    console.log(saveIndex);
-    saveReminders();
-    displayReminders();
+    $('#currentDay').text(moment().format("MMM Do YY"))
 })
